@@ -1,0 +1,4 @@
+name = HN Global Reading List Items
+description = "Creates Reading List Items from the Google Books API"
+package = HN Global
+core = 7.x

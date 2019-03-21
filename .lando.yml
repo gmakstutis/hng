@@ -1,0 +1,4 @@
+name: hng
+recipe: drupal7
+config:
+  webroot: web

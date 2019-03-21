@@ -1,0 +1,16 @@
+/**
+ * Place your custom styles here.
+ */
+
+.mb-12{
+    margin-bottom: 12px;
+}
+
+.border-1{
+    border-style: solid;
+    border-width: 1px;
+}
+
+.border-g{
+    border-color: #68696b;
+}

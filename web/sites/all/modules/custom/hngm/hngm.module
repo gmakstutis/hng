@@ -1,0 +1,62 @@
+<?php
+function hngm_entity_presave($entity, $type) {
+
+if($entity->type == 'reading_list_item'){
+
+    /* Change the value of the following variable to whatever your API Key value has been defined in the Google Developers Console */
+    $apiKey = "AIzaSyD4iZuctzPBExOi00ARh9GNbmMXLICu9fk";
+
+    /* Get the ISBN number that the user put into the ISBN field in the Drupal form */
+
+    $isbnNumber = $entity->field_isbn['und'][0]['value'];
+
+    // Uncomment the following line to check that the field value is being retrieved
+    //dpm($entity->field_isbn['und'][0]['value']);
+
+    // Uncomment the following line to use a pre-defined ISBN number for checking functions
+    //$isbnNumber = "978-1786271327";
+
+    /* Construct the Google Books API query */
+    $query = "https://www.googleapis.com/books/v1/volumes?q=";
+    $query .= $isbnNumber;
+    $query .= "&key=";
+    $query .= $apiKey;
+
+    // Uncomment the following line to confirm that the query string is being correctly generated.
+    //dpm($query);
+
+    /* Retrieve the result of the Google Books API query as a file stream */
+    $result = file_get_contents($query);
+
+    // Uncomment the following line to debug the result of the query. This will display the raw JSON results from Google
+    //dpm($result);
+
+    /* Convert the JSON code into an array */
+    $book = json_decode($result);
+
+    //Uncommment the following fields to debug the data retrieved from Google Books after it has been decoded.
+    /* dpm($book->items[0]->volumeInfo->title);
+    dpm($book->items[0]->volumeInfo->description);
+    dpm($book->items[0]->volumeInfo->imageLinks->smallThumbnail);
+    dpm($book->items[0]->volumeInfo->pageCount);
+    dpm($book->items[0]->volumeInfo->publisher);
+    dpm($book->items[0]->volumeInfo->publishedDate);
+    $authors = implode($book->items[0]->volumeInfo->authors,",");
+    dpm($authors);
+    */
+
+    /* Set the Drupal content-type field values based on the array items from the decoded query results.
+    *  We do some basic checking on those fields that are sometimes empty in the query results */
+    $entity->field_book_title['und'][0]['value'] = $book->items[0]->volumeInfo->title;
+    $entity->field_description['und'][0]['value'] = $book->items[0]->volumeInfo->description;
+    if (isset($book->items[0]->volumeInfo->imageLinks->smallThumbnail)){
+        $entity->field_image_url['und'][0]['value'] = $book->items[0]->volumeInfo->imageLinks->smallThumbnail;
+    }
+    $entity->field_pages['und'][0]['value'] = $book->items[0]->volumeInfo->pageCount;
+    if (isset($book->items[0]->volumeInfo->publisher)){
+        $entity->field_publisher['und'][0]['value'] = $book->items[0]->volumeInfo->publisher;
+    }
+    $entity->field_published['und'][0]['value'] = $book->items[0]->volumeInfo->publishedDate;
+    $entity->field_authors['und'][0]['value'] = implode($book->items[0]->volumeInfo->authors,",");
+    }
+}
